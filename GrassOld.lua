@@ -1,55 +1,31 @@
 -- Configuration
-local size = 128  -- Size of the area
+local size = 128  -- Size of the square area
 local seedSlot = 1 -- Slot where grass seeds are stored
-local fuelThreshold = 500 -- Refuel when fuel is below this value
-local seedAmount = 64 -- How many seeds to request each time
-
--- Connect to AE2 system
-local me = peripheral.find("meBridge") -- Ensure Peripheral Proxy is connected
-if not me then
-    error("ME System not found! Ensure the Peripheral Proxy is connected.")
-end
-
--- Function to request items from AE2
-function requestItem(itemName, amount)
-    local craftable = me.getCraftables()
-    for _, recipe in pairs(craftable) do
-        if recipe.name == itemName then
-            print("Requesting " .. amount .. " of " .. itemName)
-            recipe.request(amount)
-            return true
-        end
-    end
-    return false
-end
+local chestDirection = "back" -- Direction of chest (behind turtle)
 
 -- Function to check and refill seeds
 function refillSeeds()
-    print("Checking seeds...")
-    if turtle.getItemCount(seedSlot) == 0 then
-        requestItem("botania:grass_seeds", seedAmount)
-        sleep(5) -- Wait for AE2 crafting to complete
-        turtle.suck(64) -- Take from ME Interface
+    turtle.turnLeft()
+    turtle.turnLeft() -- Face the chest
+    for slot = 2, 16 do
+        turtle.select(slot)
+        if turtle.getItemCount(slot) > 0 then
+            turtle.transferTo(seedSlot) -- Move seeds to main slot
+            break
+        end
     end
-end
-
--- Function to refuel
-function refuelIfNeeded()
-    if turtle.getFuelLevel() < fuelThreshold then
-        print("Refueling...")
-        requestItem("minecraft:charcoal", 16)
-        sleep(5)
-        turtle.suck(16)
-        turtle.refuel()
-    end
+    turtle.suck(64) -- Pull more seeds if available
+    turtle.turnLeft()
+    turtle.turnLeft() -- Face back to work direction
 end
 
 -- Function to place seed
 function placeSeed()
     if turtle.getItemCount(seedSlot) == 0 then
+        print("Out of seeds! Returning to chest...")
         refillSeeds()
         if turtle.getItemCount(seedSlot) == 0 then
-            print("No seeds available! Stopping.")
+            print("No more seeds in chest! Stopping.")
             return false
         end
     end
@@ -61,7 +37,6 @@ end
 -- Move and plant in a serpentine pattern
 for y = 1, size do
     for x = 1, size - 1 do
-        refuelIfNeeded()
         if not placeSeed() then return end
         turtle.forward()
     end
