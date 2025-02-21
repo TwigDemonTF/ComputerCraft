@@ -11,9 +11,27 @@ if not me then
     error("ME System not found! Ensure the Peripheral Proxy is connected.")
 end
 
--- Save home location once at the start
-if not turtle.savePoint(homePoint) then
-    error("Failed to save home warp point!")
+if not homeExists() then
+    print("Saving home warp point...")
+    if turtle.savePoint("home") then
+        print("Home point set!")
+    else
+        error("Failed to save home warp point!")
+    end
+else
+    print("Home warp point already exists.")
+end
+
+local function homeExists()
+    local points = turtle.points()
+    if points then
+        for _, name in pairs(points) do
+            if name == "home" then
+                return true
+            end
+        end
+    end
+    return false
 end
 
 -- Function to request items from AE2
