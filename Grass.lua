@@ -11,17 +11,6 @@ if not me then
     error("ME System not found! Ensure the Peripheral Proxy is connected.")
 end
 
-if not homeExists() then
-    print("Saving home warp point...")
-    if turtle.savePoint("home") then
-        print("Home point set!")
-    else
-        error("Failed to save home warp point!")
-    end
-else
-    print("Home warp point already exists.")
-end
-
 local function homeExists()
     local points = turtle.points()
     if points then
@@ -149,6 +138,17 @@ function plantGrass()
             end
         end
     end
+end
+
+if not homeExists() then
+    print("Saving home warp point...")
+    if turtle.savePoint("home") then
+        print("Home point set!")
+    else
+        error("Failed to save home warp point!")
+    end
+else
+    print("Home warp point already exists.")
 end
 
 -- Main Execution
