@@ -1,7 +1,8 @@
 -- Configuration
 local size = 128  -- Size of the area
 local seedSlot = 1 -- Slot where grass seeds are stored
-local fuelThreshold = 10000 -- Refuel when fuel is below this value
+local fuelThreshold = 5000 -- Refuel when fuel is below this value
+local targetFuelValue = 90000 -- Target value for refilling fuel
 local seedAmount = 64 -- How many seeds to request each time
 local fuelAmount = 64 -- How much fuel to request each time
 local homePoint = "home" -- Warp point for the start location
@@ -61,7 +62,7 @@ function refuelIfNeeded()
         automata.warpToPoint("home")
         print("warped home")
         turtle.select(1)
-        while turtle.getFuelLevel() < 50000 do
+        while turtle.getFuelLevel() < targetFuelValue do
 
             turtle.suckDown(64)
             turtle.refuel()
