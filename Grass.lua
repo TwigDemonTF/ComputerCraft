@@ -1,18 +1,25 @@
 -- Configuration
 local size = 128  -- Size of the area
 local seedSlot = 1 -- Slot where grass seeds are stored
-local fuelThreshold = 500 -- Refuel when fuel is below this value
+local fuelThreshold = 10000 -- Refuel when fuel is below this value
 local seedAmount = 64 -- How many seeds to request each time
+local fuelAmount = 64 -- How much fuel to request each time
 local homePoint = "home" -- Warp point for the start location
-local me = peripheral.find("meBridge")
+local automata = peripheral.wrap("right")
+local seedChest = peripheral.wrap("top")
+local coalChest = peripheral.wrap("bottom")
 
--- Ensure ME System is available
-if not me then
-    error("ME System not found! Ensure the Peripheral Proxy is connected.")
+local function removeAllPoints()
+    local points = automata.points()
+    if points then
+        for _, name in pairs(points) do
+            automata.deletePoint(name)
+        end
+    end
 end
 
 local function homeExists()
-    local points = turtle.points()
+    local points = automata.points()
     if points then
         for _, name in pairs(points) do
             if name == "home" then
@@ -25,77 +32,43 @@ end
 
 -- Function to request items from AE2
 function requestItem(itemName, amount)
-    local craftable = me.getCraftables()
-    for _, recipe in pairs(craftable) do
-        if recipe.name == itemName then
-            print("Requesting " .. amount .. " of " .. itemName)
-            recipe.request(amount)
-            return true
-        end
-    end
+    me.exportItem({name="Grass Seeds", count=1}, "left")
     return false
-end
-
--- Function to warp to a saved point
-function warpTo(point)
-    local cooldown = turtle.getWarpCooldown()
-    if cooldown > 0 then
-        print("Warp on cooldown! Waiting " .. cooldown .. " seconds...")
-        sleep(cooldown)
-    end
-    if turtle.warpToPoint(point) then
-        print("Warped to " .. point)
-        return true
-    else
-        print("Failed to warp to " .. point)
-        return false
-    end
 end
 
 -- Function to check and refill seeds
 function refillSeeds()
     print("Refilling seeds...")
-    local tempPoint = "return_point"
-    
-    -- Save current position as a return point
-    if not turtle.savePoint(tempPoint) then
-        error("Failed to save return warp point!")
-    end
+    local tempPoint = automata.savePoint("return_point")
 
     -- Warp to home
-    warpTo(homePoint)
+    automata.warpToPoint(homePoint)
 
     -- Request seeds
-    requestItem("botania:grass_seeds", seedAmount)
-    sleep(5) -- Wait for AE2 crafting to complete
-    turtle.suck(64) -- Take from ME Interface
+    for slot = 1, 16 do
+        turtle.suckUp(seedAmount)
+    end
 
     -- Warp back to the saved position
-    warpTo(tempPoint)
+    automata.warpToPoint("return_point")
 end
 
 -- Function to refuel
 function refuelIfNeeded()
-    if turtle.getFuelLevel() < fuelThreshold then
-        print("Refueling...")
-        local tempPoint = "return_point"
+    if  turtle.getFuelLevel() <= fuelThreshold then
+        print("Refueling. . .")
+        local tempPoint = automata.savePoint("return_point")
+        automata.warpToPoint("home")
+        print("warped home")
+        turtle.select(1)
+        while turtle.getFuelLevel() < 50000 do
 
-        -- Save current position as a return point
-        if not turtle.savePoint(tempPoint) then
-            error("Failed to save return warp point!")
+            turtle.suckDown(64)
+            turtle.refuel()
+
+            -- Warp back to the saved position
+            automata.warpToPoint("return_point")
         end
-
-        -- Warp to home
-        warpTo(homePoint)
-
-        -- Request fuel
-        requestItem("minecraft:charcoal", 16)
-        sleep(5)
-        turtle.suck(16)
-        turtle.refuel()
-
-        -- Warp back to the saved position
-        warpTo(tempPoint)
     end
 end
 
@@ -142,7 +115,7 @@ end
 
 if not homeExists() then
     print("Saving home warp point...")
-    if turtle.savePoint("home") then
+    if automata.savePoint("home") then
         print("Home point set!")
     else
         error("Failed to save home warp point!")
@@ -155,3 +128,5 @@ end
 print("Starting Automated Planting System")
 plantGrass()
 print("Planting complete!")
+
+removeAllPoints()
