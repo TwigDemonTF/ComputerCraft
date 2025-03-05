@@ -41,14 +41,19 @@ end
 
 -- Function to request autocrafting
 local function requestCraft(item, amount)
-    local success = meBridge.craftItem({ name = item, count = amount })
+    local success, err = meBridge.craftItem({ name = item, count = amount })
+
+    print("Requested: " .. amount .. "x " .. item)
+    print("ME Bridge:", meBridge)
+    print("Success:", success, "Error:", err)
+
     if success then
-        print("Requested " .. amount .. "x " .. item)
         sendNotification() -- Send a notification when crafting
     else
-        print("Crafting request failed!")
+        print("Crafting request failed! Error:", err or "Unknown error")
     end
 end
+
 
 -- Main loop
 while true do
