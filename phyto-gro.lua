@@ -1,11 +1,14 @@
 local meBridge = peripheral.find("meBridge") -- Find ME Bridge automatically
 local chatBox = peripheral.find("chatBox")   -- Find Chat Box for notifications
 
-local itemName = "thermal:phytogro" -- Item to monitor
-local threshold = 20000  -- Minimum acceptable amount
-local craftAmount = 3000000 -- Amount to craft when below threshold
-local checkInterval = 60 -- Seconds between checks
 local playerName = "Twig_Demon" -- Player to receive notifications
+local checkInterval = 60 -- Seconds between checks
+
+-- Table of items to monitor
+local itemsToMonitor = {
+    { name = "thermal:phytogro", threshold = 20000, craftAmount = 3000000 },
+    { name = "mekanism:bio_fuel", threshold = 20000, craftAmount = 3000000 },
+}
 
 -- Function to get item count in ME system
 local function getItemCount(item)
@@ -17,10 +20,10 @@ local function getItemCount(item)
 end
 
 -- Function to send a toast notification
-local function sendNotification()
+local function sendNotification(item)
     if chatBox then
         local title = { text = "Command", color = "green" }
-        local message = { text = "Creating Phyto-Gro" }
+        local message = { text = "Creating " .. item }
 
         local titleJson = textutils.serialiseJSON(title)
         local messageJson = textutils.serialiseJSON(message)
@@ -44,28 +47,32 @@ local function requestCraft(item, amount)
     local success, err = meBridge.craftItem({ name = item, count = amount })
 
     print("Requested: " .. amount .. "x " .. item)
-    print("ME Bridge:", meBridge)
     print("Success:", success, "Error:", err)
 
     if success then
-        sendNotification() -- Send a notification when crafting
+        sendNotification(item) -- Send a notification when crafting
     else
-        print("Crafting request failed! Error:", err or "Unknown error")
+        print("Crafting request failed for " .. item .. "! Error:", err or "Unknown error")
     end
 end
 
-
 -- Main loop
 while true do
-    local currentAmount = getItemCount(itemName)
+    for _, itemData in ipairs(itemsToMonitor) do
+        local itemName = itemData.name
+        local threshold = itemData.threshold
+        local craftAmount = itemData.craftAmount
 
-    print("Current Phyto-Gro: " .. currentAmount)
+        local currentAmount = getItemCount(itemName)
 
-    if currentAmount < threshold then
-        print("Low Phyto-Gro detected! Requesting crafting...")
-        requestCraft(itemName, craftAmount)
-    else
-        print("Phyto-Gro level is sufficient!")
+        print("Current " .. itemName .. ": " .. currentAmount)
+
+        if currentAmount < threshold then
+            print("Low " .. itemName .. " detected! Requesting crafting...")
+            requestCraft(itemName, craftAmount)
+        else
+            print(itemName .. " level is sufficient!")
+        end
     end
 
     sleep(checkInterval)
