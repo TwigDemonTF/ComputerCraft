@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from .db import database, app
+from db import database, app
 from models import Item
 from .BackgroundWorker import BackgroundWorker
 

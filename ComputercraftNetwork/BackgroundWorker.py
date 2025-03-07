@@ -1,4 +1,4 @@
-from .db import app
+from db import app
 from models import Item
 
 import time
