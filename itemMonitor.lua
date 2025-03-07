@@ -4,9 +4,9 @@ local apiUrl = "http://192.168.193.96:9000/item/update"
 
 -- Table of items to monitor with their target PCs
 local itemsToMonitor = {
-    { name = "thermal:phytogro", target_pc = "autoCrafter", craftAmount = 3000000, "threshold" = 20000 },
-    { name = "mekanism:bio_fuel", target_pc = "autoCrafter" craftAmount = 3000000, "threshold" = 20000 },
-    { name = "botania:ender_air_bottle", target_pc = "enderAirTurtle" craftAmount = 100, "threshold" = 20 },
+    { name = "thermal:phytogro", target_pc = "autoCrafter", craftAmount = 3000000, threshold = 20000 },
+    { name = "mekanism:bio_fuel", target_pc = "autoCrafter", craftAmount = 3000000, threshold = 20000 },
+    { name = "botania:ender_air_bottle", target_pc = "enderAirTurtle", craftAmount = 100, threshold = 20 },
 }
 
 -- Function to get item count in ME system
