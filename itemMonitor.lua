@@ -1,36 +1,44 @@
-local http = require("http")
-local meBridge = peripheral.find("meBridge") -- Find ME Bridge automatically
+local meBridge = peripheral.find("meBridge")
+local checkInterval = 60 -- Seconds between checks
+local apiUrl = "http://your-flask-api-address/item/update"
 
-local apiUrl = "http://your-api-ip:9000/item/update" -- Replace with your Flask API endpoint
-local checkInterval = 60 -- Seconds between updates
+-- Table of items to monitor
+local itemsToMonitor = {
+    { name = "thermal:phytogro" },
+    { name = "mekanism:bio_fuel" },
+}
 
--- Function to get all items in ME system
-local function getAllItems()
-    return meBridge.listItems()
+-- Function to get item count in ME system
+local function getItemCount(item)
+    local itemDetail = meBridge.getItem({ name = item })
+    if itemDetail then
+        return itemDetail.amount
+    end
+    return 0
 end
 
--- Function to send item data to the API
-local function updateDatabase(items)
-    local payload = textutils.serializeJSON(items)
-    local response = http.post(apiUrl, payload, { ["Content-Type"] = "application/json" })
+-- Function to send item amounts to the API
+local function sendData()
+    local data = {}
+    for _, itemData in ipairs(itemsToMonitor) do
+        local itemName = itemData.name
+        local amount = getItemCount(itemName)
+        table.insert(data, { name = itemName, amount = amount })
+    end
+
+    -- Convert data to JSON and send to API
+    local jsonData = textutils.serializeJSON(data)
+    local response = http.post(apiUrl, jsonData, { ["Content-Type"] = "application/json" })
+
     if response then
-        local resBody = response.readAll()
-        response.close()
-        print("Database updated successfully: " .. resBody)
+        print("Sent data to API: " .. jsonData)
     else
-        print("Failed to update database!")
+        print("Failed to send data to API")
     end
 end
 
 -- Main loop
 while true do
-    local items = getAllItems()
-    local itemData = {}
-    
-    for _, item in ipairs(items) do
-        table.insert(itemData, { name = item.name, amount = item.amount })
-    end
-    
-    updateDatabase(itemData)
+    sendData()
     sleep(checkInterval)
 end

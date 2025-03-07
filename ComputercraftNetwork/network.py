@@ -18,6 +18,11 @@ def update_item():
     database.session.commit()
     return jsonify({"message": "Items updated"})
 
+@app.route('item/craft', methods=['POST'])
+def craftItem():
+    targetPc = request.args.get('targetPc')
+
+
 if __name__ == '__main__':
     with app.app_context():
         database.create_all()
