@@ -4,9 +4,9 @@ local apiUrl = "http://your-flask-api-address/item/update"
 
 -- Table of items to monitor with their target PCs
 local itemsToMonitor = {
-    { name = "thermal:phytogro", target_pc = "autoCrafter", craftAmount = 3000000 },
-    { name = "mekanism:bio_fuel", target_pc = "autoCrafter" craftAmount = 3000000 },
-    { name = "botania:ender_air_bottle", target_pc = "enderAirTurtle" craftAmount = 100 },
+    { name = "thermal:phytogro", target_pc = "autoCrafter", craftAmount = 3000000, "threshold" = 20000 },
+    { name = "mekanism:bio_fuel", target_pc = "autoCrafter" craftAmount = 3000000, "threshold" = 20000 },
+    { name = "botania:ender_air_bottle", target_pc = "enderAirTurtle" craftAmount, "threshold" = 20 = 100 },
 }
 
 -- Function to get item count in ME system
@@ -26,8 +26,9 @@ local function sendData()
         local targetPc = itemData.target_pc
         local amount = getItemCount(itemName)
         local craftAmount = itemData.craftAmount
+        local threshold = itemdata.threshold
 
-        table.insert(data, { name = itemName, amount = amount, target_pc = targetPc, craftAmount = craftAmount })
+        table.insert(data, { name = itemName, amount = amount, targetPc = targetPc, craftAmount = craftAmount, threshold = threshold })
     end
 
     -- Convert data to JSON and send to API
