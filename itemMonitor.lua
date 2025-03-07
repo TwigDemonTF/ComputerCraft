@@ -1,6 +1,6 @@
 local meBridge = peripheral.find("meBridge")
 local checkInterval = 60 -- Seconds between checks
-local apiUrl = "http://your-flask-api-address/item/update"
+local apiUrl = "http://192.168.193.96:9000/item/update"
 
 -- Table of items to monitor with their target PCs
 local itemsToMonitor = {
