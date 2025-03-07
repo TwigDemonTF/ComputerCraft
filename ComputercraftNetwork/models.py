@@ -7,3 +7,7 @@ class Item(database.Model):
     amount = database.Column(database.Integer, nullable=False, default=0)
     threshold = database.Column(database.Integer, nullable=False, default=1000)
     targetPc = database.Column(database.String(100), nullable=True)  # The PC or turtle to send crafting requests
+    carftAmount = database.Column(database.Integer, nullable=False, default=20000)
+
+    def __repr__(self):
+        return super().__repr__() + f"self.name, self.amount, self.threshold, self.targetPc"    
