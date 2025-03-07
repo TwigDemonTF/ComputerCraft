@@ -1,53 +1,36 @@
-local http = require("http")  -- Ensure HTTP API is enabled in ComputerCraft
-local meBridge = peripheral.find("meBridge")
-local chatBox = peripheral.find("chatBox")
+local http = require("http")
+local meBridge = peripheral.find("meBridge") -- Find ME Bridge automatically
 
-local playerName = "Twig_Demon"
-local checkInterval = 60
-local apiURL = "http://192.168.193.96:9000"
+local apiUrl = "http://your-api-ip:9000/item/update" -- Replace with your Flask API endpoint
+local checkInterval = 60 -- Seconds between updates
 
--- Function to fetch thresholds from the API
-local function fetchThresholds()
-    local response = http.get(apiURL .. "/item/thresholds")
+-- Function to get all items in ME system
+local function getAllItems()
+    return meBridge.listItems()
+end
+
+-- Function to send item data to the API
+local function updateDatabase(items)
+    local payload = textutils.serializeJSON(items)
+    local response = http.post(apiUrl, payload, { ["Content-Type"] = "application/json" })
     if response then
-        local data = response.readAll()
+        local resBody = response.readAll()
         response.close()
-        return textutils.unserialiseJSON(data)
+        print("Database updated successfully: " .. resBody)
     else
-        print("Failed to fetch thresholds!")
-        return {}
+        print("Failed to update database!")
     end
 end
 
--- Function to get item count in ME system
-local function getItemCount(item)
-    local itemDetail = meBridge.getItem({ name = item })
-    if itemDetail then return itemDetail.amount end
-    return 0
-end
-
--- Function to send data to the API
-local function sendToAPI(item, amount)
-    local jsonData = textutils.serialiseJSON({ name = item, amount = amount })
-    local response = http.post(apiURL .. "/item/amounts", jsonData, { ["Content-Type"] = "application/json" })
-    if response then
-        print("Sent data to API for " .. item)
-        response.close()
-    else
-        print("Failed to send data for " .. item)
-    end
-end
-
+-- Main loop
 while true do
-    local thresholds = fetchThresholds()  -- Get thresholds from API
-
-    for itemName, threshold in pairs(thresholds) do
-        local currentAmount = getItemCount(itemName)
-        print("Current " .. itemName .. ": " .. currentAmount .. " | Threshold: " .. threshold)
-
-        -- Send updated amounts to the API
-        sendToAPI(itemName, currentAmount)
+    local items = getAllItems()
+    local itemData = {}
+    
+    for _, item in ipairs(items) do
+        table.insert(itemData, { name = item.name, amount = item.amount })
     end
-
+    
+    updateDatabase(itemData)
     sleep(checkInterval)
 end
