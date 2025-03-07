@@ -28,7 +28,7 @@ local function sendData()
         local craftAmount = itemData.craftAmount
         local threshold = itemData.threshold
 
-        table.insert(data, { name = itemName, amount = amount, target_pc = targetPc, craftAmount = craftAmount, itemThreshold = threshold })
+        table.insert(data, { name = itemName, amount = amount, targetPc = targetPc, craftAmount = craftAmount, itemThreshold = threshold })
     end
 
     -- Convert data to JSON and send to API
