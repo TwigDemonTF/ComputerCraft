@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from db import database, app
 from models import Item
-from .BackgroundWorker import BackgroundWorker
+from BackgroundWorker import BackgroundWorker
 
 import threading
 
@@ -18,7 +18,7 @@ def update_item():
     database.session.commit()
     return jsonify({"message": "Items updated"})
 
-@app.route('item/craft', methods=['POST'])
+@app.route('/item/craft', methods=['POST'])
 def craftItem():
     targetPc = request.args.get('targetPc')
 
