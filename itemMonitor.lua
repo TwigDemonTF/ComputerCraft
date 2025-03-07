@@ -1,12 +1,11 @@
 local meBridge = peripheral.find("meBridge")
 local checkInterval = 60 -- Seconds between checks
-local apiUrl = "http://192.168.193.96:9000/item/update"
+local apiUrl = "http://your-flask-api-address/item/update"
 
--- Table of items to monitor with their target PCs
+-- Table of items to monitor
 local itemsToMonitor = {
-    { name = "thermal:phytogro", target_pc = "autoCrafter", craftAmount = 3000000, threshold = 20000 },
-    { name = "mekanism:bio_fuel", target_pc = "autoCrafter", craftAmount = 3000000, threshold = 20000 },
-    { name = "botania:ender_air_bottle", target_pc = "enderAirTurtle", craftAmount = 100, threshold = 20 },
+    { name = "thermal:phytogro" },
+    { name = "mekanism:bio_fuel" },
 }
 
 -- Function to get item count in ME system
@@ -23,12 +22,8 @@ local function sendData()
     local data = {}
     for _, itemData in ipairs(itemsToMonitor) do
         local itemName = itemData.name
-        local targetPc = itemData.target_pc
         local amount = getItemCount(itemName)
-        local craftAmount = itemData.craftAmount
-        local threshold = itemData.threshold
-
-        table.insert(data, { name = itemName, amount = amount, targetPc = targetPc, craftAmount = craftAmount, itemThreshold = threshold })
+        table.insert(data, { name = itemName, amount = amount })
     end
 
     -- Convert data to JSON and send to API

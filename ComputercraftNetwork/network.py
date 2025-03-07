@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify # type: ignore
 from db import database, app
 from models import Item
 from BackgroundWorker import BackgroundWorker
@@ -13,15 +13,10 @@ def update_item():
         if existing:
             existing.amount = item['amount']
         else:
-            new_item = Item(name=item['name'], amount=item['amount'])
+            new_item = Item(name=item['name'], amount=item['amount'], threshold=item['itemThreshold'], targetPc=item['targetPc'], craftAmount=item['craftAmount'])
             database.session.add(new_item)
     database.session.commit()
     return jsonify({"message": "Items updated"})
-
-@app.route('/item/craft', methods=['POST'])
-def craftItem():
-    targetPc = request.args.get('targetPc')
-
 
 if __name__ == '__main__':
     with app.app_context():
